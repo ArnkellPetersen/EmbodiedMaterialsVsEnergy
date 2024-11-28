@@ -1,0 +1,21 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+from src.GWP_functions   import temporal_adjustment
+
+# Plot the original GWP and the temporal adjustment
+Tend = 100  # Time for temporal adjustment
+Y = np.arange(1, Tend+1)
+T = temporal_adjustment(Y)  # Assuming tadj is a defined function
+plt.figure()
+plt.plot(Y, T)
+plt.title('Temporal adjustment of GWP')
+plt.xlabel('Year')
+plt.ylabel('Reduction in GWP [%]')
+plt.grid(True)
+plt.xlim([0, Tend])
+plt.ylim([0, 1])
+#plt.show()
+plt.savefig('TemporalAdjustment.png')
+
+print(Y,T)
