@@ -1,5 +1,5 @@
 
-
+import matplotlib.pyplot as plt
 import numpy as np
 
 def temporal_adjustment(t, T=100):
@@ -13,4 +13,3 @@ def temporal_adjustment(t, T=100):
         float : Temporal adjustment factor
     """
     return 2 - np.exp((np.log(2)/T)*t)
-

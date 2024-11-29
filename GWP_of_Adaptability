@@ -3,14 +3,16 @@ import numpy as np
 
 from src.GWP_functions   import temporal_adjustment
 
+
+
 # Plot the original GWP and the temporal adjustment
 Tend = 100  # Time for temporal adjustment
-Y = np.arange(1, Tend+1)
-T = temporal_adjustment(Y)  # Assuming tadj is a defined function
+Y = np.arange(0, Tend+1)
+TempAdjust = temporal_adjustment(Y)  # Assuming tadj is a defined function
 plt.figure()
-plt.plot(Y, T)
+plt.plot(Y, TempAdjust)
 plt.title('Temporal adjustment of GWP')
-plt.xlabel('Year')
+plt.xlabel('Year of emission')
 plt.ylabel('Reduction in GWP [%]')
 plt.grid(True)
 plt.xlim([0, Tend])
@@ -18,4 +20,123 @@ plt.ylim([0, 1])
 #plt.show()
 plt.savefig('TemporalAdjustment.png')
 
-print(Y,T)
+# Create the figure
+plt.figure()
+#
+# Loop through the different horizons
+for T in [100, 200, 300, 400, 500]:
+    Yhor = np.arange(1, T+1)
+    TempAdjusthor = temporal_adjustment(Yhor, T=T)
+    plt.plot(Yhor, TempAdjusthor, label=f'{T} year horizon')
+
+# Set the title, labels, and limits
+plt.title('Temporal adjustment of GWP')
+plt.xlabel('Year of emission')
+plt.ylabel('Reduction in GWP [%]')
+plt.legend()  # Add legend to the plot
+plt.grid(True)
+plt.xlim([0, max([100, 200, 300, 400, 500])])
+plt.ylim([0, 1])
+
+# Save the plot
+plt.savefig('TemporalAdjustmentHorizons.png')
+
+plt.figure()
+plt.plot(Y, TempAdjust)
+plt.title('The relationship between the inital and future CO₂ emissions')
+plt.xlabel('Year of emission')
+plt.ylabel(r'$\frac{\text{Future emissions}}{\text{Initial emissions}}$ [-]')
+plt.grid(True)
+plt.xlim([0, Tend])
+plt.ylim([0, 1])
+#plt.show()
+plt.savefig('RelationsshipFutureVsInitalEmissions.png')
+
+plt.figure()
+plt.plot([0, 1], [0, 1])
+plt.title('Probability of usage vs the investment and payback')
+plt.xlabel('Probability of usage')
+plt.ylabel(r'$\frac{\text{Future emissions}}{\text{Initial emissions}}$ [-]')
+plt.grid(True)
+plt.xlim([0, 1])
+plt.ylim([0, 1])
+#plt.show()
+plt.savefig('ProbabilityVsEmissionsYear1.png')
+
+#########################################################################
+# Plot the probability of usage in time and the net present neutral GWP #
+#########################################################################
+
+#Reshape TempAdjust to a 2D array with one column
+TempAdjust = TempAdjust.reshape(-1, 1)
+
+# Define probabilities
+Prob = 5  # Number of probabilities
+probabilities = np.linspace(1, 0, Prob+1)[:-1]
+
+# Multiply TempAdjust with probabilities to get a 5-row matrix
+TempAdjustProb = TempAdjust * probabilities
+
+# Plotting
+plt.figure()
+#plt.plot(Y, TempAdjustProb)
+
+for i in range(TempAdjustProb.shape[1]):
+    plt.plot(Y, TempAdjustProb[:, i], label=f'{probabilities[i] * 100:.0f} % probability of usage')
+plt.title('Probability of usage in time and the net present neutral GWP')
+plt.xlabel('Year of emission')
+plt.ylabel(r'$\frac{\text{Future emissions}}{\text{Initial emissions}}$ [-]')
+plt.grid(True)
+plt.xlim([0, Tend])
+plt.ylim([0, 1])
+plt.legend()
+#plt.show()
+plt.savefig('TemporalAdjustmentProbabilities.png')
+
+#########################################################################
+# The  #
+#########################################################################
+
+# Define the development paths (interest rates)
+DevelopementPaths = np.array([ 2 , 4, 6])/100  # Convert percentages to decimals
+
+# Define the principal amount and number of years
+P = 1  # Principal amount
+
+# Compute the compounded amounts for each year and each interest rate
+DevelopementPathsInt = np.zeros((len(DevelopementPaths), len(Y)))  # Initialize an array to hold the results
+for i, r in enumerate(DevelopementPaths):
+    for j, t in enumerate(Y):
+        DevelopementPathsInt[i, j] = P * (1 - r)**t  # Use (1 - r) instead of (1 + r) for negative interest
+       
+
+# Plot the initial TemporalAdjustment
+plt.figure()
+plt.plot(Y, TempAdjust, label='Initial Temporal Adjustment')
+
+# Calculate and plot the new TemporalAdjustments for each interest rate
+# Calculate and plot the new TemporalAdjustments for each interest rate
+for i, r in enumerate(DevelopementPaths):
+    rate = DevelopementPathsInt[i, :]
+    new_temp_adjust = temporal_adjustment(Y) * rate
+    plt.plot(Y, new_temp_adjust, label=f'Interest rate: {r * 100:.0f}%')
+
+# Add titles and labels
+plt.title('Temporal adjustment of GWP with different interest rates')
+plt.xlabel('Year of emission')
+plt.ylabel(r'$\frac{\text{Future emissions}}{\text{Initial emissions}}$ [-]')
+plt.grid(True)
+plt.xlim([0, Tend])
+plt.ylim([0, 1])
+plt.legend()  # Add legend to the plot
+
+# Add a notice
+plt.text(0.5, 0.5, 'NOTE: This plot may be incorrect', 
+         fontsize=12, color='red', 
+         horizontalalignment='center', 
+         verticalalignment='center',
+         transform=plt.gca().transAxes)  # Relative coordinates
+
+# Save the plot
+plt.savefig('TemporalAdjustmentWithInterestRates.png')
+#plt.show()
