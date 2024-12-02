@@ -98,7 +98,7 @@ plt.savefig('TemporalAdjustmentProbabilities.png')
 #########################################################################
 
 # Define the development paths (interest rates)
-DevelopementPaths = np.array([ 2 , 4, 6])/100  # Convert percentages to decimals
+DevelopementPaths = np.array([ 2 , 2, 2])/100  # Convert percentages to decimals
 
 # Define the principal amount and number of years
 P = 1  # Principal amount
@@ -110,9 +110,21 @@ for i, r in enumerate(DevelopementPaths):
         DevelopementPathsInt[i, j] = P * (1 - r)**t  # Use (1 - r) instead of (1 + r) for negative interest
        
 
+# Reshape DevelopementPathsInt[0] to a column vector
+DevelopementPathsInt_0 = DevelopementPathsInt[0].reshape(-1, 1)
+
+# Ensure TempAdjust is also a column vector
+TempAdjust = TempAdjust.reshape(-1, 1)
+
+# Multiply DevelopementPathsInt_0 with TempAdjust element-wise
+result = DevelopementPathsInt_0 * TempAdjust
+
+
 # Plot the initial TemporalAdjustment
 plt.figure()
 plt.plot(Y, TempAdjust, label='Initial Temporal Adjustment')
+
+
 
 # Calculate and plot the new TemporalAdjustments for each interest rate
 # Calculate and plot the new TemporalAdjustments for each interest rate
@@ -120,7 +132,7 @@ for i, r in enumerate(DevelopementPaths):
     rate = DevelopementPathsInt[i, :]
     new_temp_adjust = temporal_adjustment(Y) * rate
     plt.plot(Y, new_temp_adjust, label=f'Interest rate: {r * 100:.0f}%')
-
+print(new_temp_adjust)
 # Add titles and labels
 plt.title('Temporal adjustment of GWP with different interest rates')
 plt.xlabel('Year of emission')
